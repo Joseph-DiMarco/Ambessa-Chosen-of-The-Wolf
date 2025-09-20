@@ -1,13 +1,16 @@
 <script>
   var book = ePub("Ambessa Chosen of the Wolf (C. L. Clark) (Z-Library).epub");
+  
   var rendition = book.renderTo("area", {
     width: "100%",
     height: "100%",
-    flow: "paginated"
+    manager: "continuous",
+    flow: "scrolled"
   });
+  
   rendition.display();
 
-  // Add basic keyboard navigation
+  // Optional keyboard navigation (if paginated mode needed)
   document.addEventListener("keydown", function(event) {
     if(event.key === "ArrowRight") {
       rendition.next();
@@ -16,5 +19,4 @@
       rendition.prev();
     }
   });
-
 </script>
