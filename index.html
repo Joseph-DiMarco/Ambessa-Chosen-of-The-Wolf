@@ -1,22 +1,302 @@
-<script>
-  var book = ePub("Ambessa Chosen of the Wolf (C. L. Clark) (Z-Library).epub");
-  
-  var rendition = book.renderTo("area", {
-    width: "100%",
-    height: "100%",
-    manager: "continuous",
-    flow: "scrolled"
-  });
-  
-  rendition.display();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ambessa: Chosen of the Wolf - EPUB Reader</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/epub.js/0.3.93/epub.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 5px solid #fdbb2d;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .viewer-container {
+            position: relative;
+            height: 70vh;
+            overflow: hidden;
+            background: #f0f0f0;
+        }
+        
+        #viewer {
+            width: 100%;
+            height: 100%;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            color: #666;
+        }
+        
+        .info-panel {
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .book-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .book-info div {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .book-info h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .progress {
+            background: white;
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #3498db;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: white;
+            background: #2c3e50;
+            margin-top: 20px;
+            border-radius: 0 0 8px 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 0;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .viewer-container {
+                height: 60vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Ambessa: Chosen of the Wolf</h1>
+            <p class="subtitle">by C. L. Clark - EPUB Reader</p>
+        </header>
+        
+        <div class="controls">
+            <button id="prev">Previous</button>
+            <button id="next">Next</button>
+            <button id="toc">Table of Contents</button>
+            <button id="fullscreen">Fullscreen</button>
+        </div>
+        
+        <div class="viewer-container">
+            <div id="viewer"></div>
+            <div class="loader" id="loader">Loading book...</div>
+        </div>
+        
+        <div class="info-panel">
+            <div class="book-info">
+                <div>
+                    <h3>Book Information</h3>
+                    <p id="book-title">Ambessa: Chosen of the Wolf</p>
+                    <p id="book-author">C. L. Clark</p>
+                </div>
+                <div class="progress">
+                    <h3>Reading Progress</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <p id="progress-text">0%</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>EPUB Reader for GitHub Pages | Powered by EPUB.js</p>
+        </footer>
+    </div>
 
-  // Optional keyboard navigation (if paginated mode needed)
-  document.addEventListener("keydown", function(event) {
-    if(event.key === "ArrowRight") {
-      rendition.next();
-    }
-    else if(event.key === "ArrowLeft") {
-      rendition.prev();
-    }
-  });
-</script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get the book URL - adjust if your file is in a specific folder
+            const bookUrl = "Ambessa Chosen of the Wolf (C. L. Clark) (Z-Library).epub";
+            
+            // Setup EPUB.js
+            const viewer = document.getElementById('viewer');
+            const loader = document.getElementById('loader');
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
+            
+            // Initialize the book
+            const book = ePub(bookUrl);
+            const rendition = book.renderTo("viewer", {
+                width: "100%",
+                height: "100%",
+                spread: "auto"
+            });
+            
+            rendition.display();
+            
+            // Set up navigation
+            document.getElementById("next").addEventListener("click", function() {
+                rendition.next();
+            });
+            
+            document.getElementById("prev").addEventListener("click", function() {
+                rendition.prev();
+            });
+            
+            // Table of Contents
+            document.getElementById("toc").addEventListener("click", function() {
+                book.loaded.navigation.then(function(toc) {
+                    console.log(toc); // You can implement a proper TOC modal here
+                    alert("Table of Contents feature would open here. Check console for available chapters.");
+                });
+            });
+            
+            // Fullscreen mode
+            document.getElementById("fullscreen").addEventListener("click", function() {
+                const container = document.querySelector('.viewer-container');
+                if (!document.fullscreenElement) {
+                    if (container.requestFullscreen) {
+                        container.requestFullscreen();
+                    } else if (container.webkitRequestFullscreen) {
+                        container.webkitRequestFullscreen();
+                    } else if (container.msRequestFullscreen) {
+                        container.msRequestFullscreen();
+                    }
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
+                    }
+                }
+            });
+            
+            // Update metadata when book is loaded
+            book.loaded.metadata.then(function(meta) {
+                document.getElementById('book-title').textContent = meta.title;
+                document.getElementById('book-author').textContent = meta.creator;
+            });
+            
+            // Listen for page changes to update progress
+            rendition.on("relocated", function(location) {
+                if (book) {
+                    book.locations.generate(1600).then(function(locations) {
+                        const currentLocation = location.start.cfi;
+                        const progress = book.locations.percentageFromCfi(currentLocation);
+                        const percentage = Math.floor(progress * 100);
+                        
+                        progressFill.style.width = percentage + '%';
+                        progressText.textContent = percentage + '%';
+                    });
+                }
+            });
+            
+            // Hide loader when book is rendered
+            rendition.on("displayed", function() {
+                loader.style.display = "none";
+            });
+            
+            // Handle errors
+            rendition.on("error", function(err) {
+                console.error("Error rendering book:", err);
+                loader.innerHTML = "Error loading book. Check console for details.";
+            });
+        });
+    </script>
+</body>
+</html>
